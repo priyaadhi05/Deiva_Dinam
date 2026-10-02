@@ -28,15 +28,14 @@ const ONBOARDED_KEY = 'deiva-dinam:onboarded';
 const LANGUAGE_KEY = 'deiva-dinam:selected-language'; // written by LanguageProvider
 const NOTIFICATION_PREFIX = 'deiva-dinam-reminder-';
 const CHANNEL_ID = 'deiva-dinam-reminders';
-const REMINDER_HOUR = 9; // fires at 9am local device time on each countdown day
+const REMINDER_HOUR = 6; // fires at 6am local device time, before morning pooja
 
-// The countdown per followed event: a heads-up 3 days out, again at 2 days,
-// and a final nudge the day before. Every followed topic gets this by
-// default, but it's customizable per topic (see "Lead days" below) - e.g.
-// someone can want the full countdown for Thaipusam but just a single
-// day-before nudge for a monthly Pradosham. Either way this is the app's
-// whole reminder mechanism - never a calendar entry, always a notification.
-const DEFAULT_LEAD_DAYS: readonly number[] = [3, 2, 1];
+// The reminders per followed event: one the day before (1) and one on the
+// day itself (0). Every followed topic gets both by default; per topic (see
+// "Lead days" below) someone can drop the day-before one and keep just the
+// same-day reminder, which is always sent. Either way this is the app's whole
+// reminder mechanism - never a calendar entry, always a notification.
+export const DEFAULT_LEAD_DAYS: readonly number[] = [1, 0];
 
 // --- Onboarding ------------------------------------------------------------
 
@@ -49,12 +48,13 @@ export async function markOnboarded(): Promise<void> {
   await AsyncStorage.setItem(ONBOARDED_KEY, 'true');
 }
 
-// iOS caps pending local notifications at ~64. Each followed event now
-// produces up to 3 notifications, so keep well under that: 18 events * 3 =
-// 54. The window is refreshed (see scheduleUpcomingReminders) every time the
-// app opens or a follow preference changes, so events sliding into range
-// keep getting picked up.
-const MAX_SCHEDULED_EVENTS = 18;
+// iOS caps pending local notifications at ~64. Each followed event produces
+// up to 2 notifications (the day before and the day itself), so budget by
+// notification rather than by event and stay under the cap. The window is
+// refreshed (see scheduleUpcomingReminders) every time the app opens or a
+// follow preference changes, so events sliding into range keep getting
+// picked up.
+const MAX_SCHEDULED_NOTIFICATIONS = 60;
 
 if (SUPPORTED) {
   Notifications.setNotificationHandler({
@@ -67,13 +67,11 @@ if (SUPPORTED) {
   });
 }
 
-// Notification title/body for the 3-day / 2-day / 1-day / today countdown,
+// Notification title/body for the day-before / today reminders,
 // in the selected language (see each lib/i18n/content/<lang>.ts). Each lead
 // day gets its own wording rather than reusing one template with only the
-// day count swapped in, so a followed topic's three nudges read as a
-// build-up rather than the same line repeated three times, e.g.:
-//   3 days: "🦚 Murugan's special day is in 3 days" / "Thaipusam is coming
-//     up on Feb 1 - a good time to start planning. 🙏"
+// day count swapped in, so a followed topic's two nudges read as a
+// build-up rather than the same line repeated, e.g.:
 //   1 day:  "🦚 Murugan's special day is tomorrow" / "Tomorrow is Thaipusam -
 //     take a moment tonight to prepare your heart. 🙏"
 //   Today:  "🦚 Today is Thaipusam" / "May Lord Murugan bless you and your
@@ -214,8 +212,8 @@ export async function getFollowedDeities(): Promise<typeof DEITIES> {
 
 // --- Lead-day preferences ------------------------------------------------
 //
-// How many days before a followed topic's date each nudge fires, e.g. [3, 2,
-// 1] for the full countdown or just [1] for a single day-before nudge.
+// How many days before a followed topic's date each nudge fires: [1, 0] for
+// the day before and the day itself, or just [0] for the same-day one.
 // Customizable per topic (deity + category) - the same granularity following
 // already works at - via the deity page's NotifyPanel and an event's own
 // "Set reminder" control. Topics with no explicit choice get
@@ -227,7 +225,15 @@ async function getLeadDaysMap(): Promise<Record<string, number[]>> {
   if (raw === null) return {};
   try {
     const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === 'object' ? parsed : {};
+    if (!parsed || typeof parsed !== 'object') return {};
+    // Choices saved by version 1.0.0 (e.g. [3, 2, 1]) map onto today's
+    // options: the 3- and 2-day nudges are gone, and the same-day one is
+    // always included.
+    const map: Record<string, number[]> = {};
+    for (const [topic, days] of Object.entries(parsed)) {
+      if (Array.isArray(days)) map[topic] = days.includes(1) ? [1, 0] : [0];
+    }
+    return map;
   } catch {
     return {};
   }
@@ -314,19 +320,26 @@ async function rescheduleAll(): Promise<void> {
   const followed = await getFollowedTopics();
   const leadDaysMap = await getLeadDaysMap();
   const languageId = (await AsyncStorage.getItem(LANGUAGE_KEY)) ?? DEFAULT_LANGUAGE_ID;
-  const upcoming = getUpcomingEvents()
-    .filter((e) => followed.has(topicKey(e.deity, e.category)))
-    .slice(0, MAX_SCHEDULED_EVENTS);
+  const upcoming = getUpcomingEvents().filter((e) => followed.has(topicKey(e.deity, e.category)));
 
+  let scheduled = 0;
   for (const event of upcoming) {
     const [y, m, d] = event.date.split('-').map(Number);
     const leadDays = leadDaysMap[topicKey(event.deity, event.category)] ?? DEFAULT_LEAD_DAYS;
 
-    for (const daysBefore of leadDays) {
-      const fireDate = new Date(y, m - 1, d, REMINDER_HOUR, 0, 0); // device-local time
-      fireDate.setDate(fireDate.getDate() - daysBefore);
-      if (fireDate.getTime() <= Date.now()) continue;
+    // Only schedule an event if its whole countdown fits, so no event is left
+    // with a partial set of nudges.
+    const fireDates = leadDays
+      .map((daysBefore) => {
+        const fireDate = new Date(y, m - 1, d, REMINDER_HOUR, 0, 0); // device-local time
+        fireDate.setDate(fireDate.getDate() - daysBefore);
+        return { daysBefore, fireDate };
+      })
+      .filter(({ fireDate }) => fireDate.getTime() > Date.now());
+    if (scheduled + fireDates.length > MAX_SCHEDULED_NOTIFICATIONS) break;
+    scheduled += fireDates.length;
 
+    for (const { daysBefore, fireDate } of fireDates) {
       await Notifications.scheduleNotificationAsync({
         identifier: `${NOTIFICATION_PREFIX}${event.id}-${daysBefore}d`,
         content: {

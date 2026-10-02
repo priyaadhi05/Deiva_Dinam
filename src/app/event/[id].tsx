@@ -16,7 +16,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { APP_INSTALL_URL } from '@/lib/app-info';
 import { CATEGORY_STYLE } from '@/lib/category-style';
 import { getDevotional } from '@/lib/i18n/content';
-import { REMINDERS_SUPPORTED, getTopicLeadDays, isTopicFollowed, setTopicFollowed, setTopicLeadDays } from '@/lib/notifications';
+import { DEFAULT_LEAD_DAYS, REMINDERS_SUPPORTED, getTopicLeadDays, isTopicFollowed, setTopicFollowed, setTopicLeadDays } from '@/lib/notifications';
 import { ensureRemindersAllowed } from '@/lib/reminder-permission';
 import { AUTO_REGION_ID, resolveRegionTimeZone } from '@/lib/regions';
 import { buildGreeting } from '@/lib/share-greeting';
@@ -30,7 +30,7 @@ export default function EventDetailScreen() {
   const theme = useTheme();
   const { t, categoryLabel, deityName: translatedDeityName, localize, fullDate, languageId } = useTranslation();
   const [reminderOn, setReminderOn] = useState(false);
-  const [leadDays, setLeadDays] = useState<number[]>([3, 2, 1]);
+  const [leadDays, setLeadDays] = useState<number[]>([...DEFAULT_LEAD_DAYS]);
   const [busy, setBusy] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   // Always starts on the phone's own time zone, so someone in Berlin or

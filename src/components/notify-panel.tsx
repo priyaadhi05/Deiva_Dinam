@@ -11,6 +11,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useTranslation } from '@/hooks/use-translation';
 import { CATEGORY_STYLE } from '@/lib/category-style';
 import {
+  DEFAULT_LEAD_DAYS,
   REMINDERS_SUPPORTED,
   getDeityFollowState,
   getTopicLeadDays,
@@ -139,7 +140,7 @@ function NotifyPanelBody({ deityId, deityName }: { deityId: string; deityName: s
                     {on && (
                       <ThemedView style={styles.leadDaysIndent}>
                         <LeadDaysRow
-                          days={leadDaysState[cat] ?? [3, 2, 1]}
+                          days={leadDaysState[cat] ?? [...DEFAULT_LEAD_DAYS]}
                           disabled={busy}
                           onChange={(days) => withPermission(() => setTopicLeadDays(deityId, cat, days))}
                         />

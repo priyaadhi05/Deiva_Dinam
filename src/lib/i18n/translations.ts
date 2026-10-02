@@ -82,9 +82,8 @@ const EN = {
   'event.sameAsIST': '{{region}} is on the same clock as India (IST), so these times match the panchangam exactly.',
   'event.timingNote': 'Shown for {{region}}. Panchangam reference (IST): {{startIST}} → {{endIST}}',
 
-  'leadDays.3': '3 days before',
-  'leadDays.2': '2 days before',
   'leadDays.1': '1 day before',
+  'leadDays.0': 'On the day',
 
   'share.whatsapp': 'WhatsApp',
   'share.instagram': 'Instagram',
@@ -207,9 +206,8 @@ const TA: Record<TranslationKey, string> = {
   'event.sameAsIST': '{{region}} இந்திய நேரத்தையே (IST) பின்பற்றுகிறது, எனவே இந்த நேரங்கள் பஞ்சாங்கத்துடன் அப்படியே பொருந்தும்.',
   'event.timingNote': '{{region}} க்காகக் காட்டப்படுகிறது. பஞ்சாங்க குறிப்பு (இந்திய நேரம்): {{startIST}} → {{endIST}}',
 
-  'leadDays.3': '3 நாட்களுக்கு முன்',
-  'leadDays.2': '2 நாட்களுக்கு முன்',
   'leadDays.1': '1 நாளுக்கு முன்',
+  'leadDays.0': 'அன்றே',
 
   'share.whatsapp': 'வாட்ஸ்அப்',
   'share.instagram': 'இன்ஸ்டாகிராம்',
@@ -332,9 +330,8 @@ const TE: Record<TranslationKey, string> = {
   'event.sameAsIST': '{{region}} భారత కాలమానాన్నే (IST) పాటిస్తుంది, కాబట్టి ఈ సమయాలు పంచాంగంతో సరిగ్గా సరిపోతాయి.',
   'event.timingNote': '{{region}} కోసం చూపబడింది. పంచాంగ సూచన (భారత కాలమానం): {{startIST}} → {{endIST}}',
 
-  'leadDays.3': '3 రోజుల ముందు',
-  'leadDays.2': '2 రోజుల ముందు',
   'leadDays.1': '1 రోజు ముందు',
+  'leadDays.0': 'అదే రోజు',
 
   'share.whatsapp': 'వాట్సాప్',
   'share.instagram': 'ఇన్‌స్టాగ్రామ్',
@@ -457,9 +454,8 @@ const KN: Record<TranslationKey, string> = {
   'event.sameAsIST': '{{region}} ಭಾರತೀಯ ಕಾಲಮಾನವನ್ನೇ (IST) ಅನುಸರಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ಈ ಸಮಯಗಳು ಪಂಚಾಂಗಕ್ಕೆ ಸರಿಯಾಗಿ ಹೊಂದುತ್ತವೆ.',
   'event.timingNote': '{{region}} ಗಾಗಿ ತೋರಿಸಲಾಗಿದೆ. ಪಂಚಾಂಗ ಉಲ್ಲೇಖ (ಭಾರತೀಯ ಕಾಲಮಾನ): {{startIST}} → {{endIST}}',
 
-  'leadDays.3': '3 ದಿನಗಳ ಮೊದಲು',
-  'leadDays.2': '2 ದಿನಗಳ ಮೊದಲು',
   'leadDays.1': '1 ದಿನದ ಮೊದಲು',
+  'leadDays.0': 'ಅದೇ ದಿನ',
 
   'share.whatsapp': 'ವಾಟ್ಸಾಪ್',
   'share.instagram': 'ಇನ್‌ಸ್ಟಾಗ್ರಾಮ್',
@@ -582,9 +578,8 @@ const HI: Record<TranslationKey, string> = {
   'event.sameAsIST': '{{region}} में भारतीय मानक समय (IST) ही चलता है, इसलिए ये समय पंचांग से बिल्कुल मेल खाते हैं।',
   'event.timingNote': '{{region}} के लिए दिखाया गया है। पंचांग संदर्भ (भारतीय मानक समय): {{startIST}} → {{endIST}}',
 
-  'leadDays.3': '3 दिन पहले',
-  'leadDays.2': '2 दिन पहले',
   'leadDays.1': '1 दिन पहले',
+  'leadDays.0': 'उसी दिन',
 
   'share.whatsapp': 'व्हाट्सएप',
   'share.instagram': 'इंस्टाग्राम',
