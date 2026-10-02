@@ -7,6 +7,7 @@ import { Platform, useColorScheme } from 'react-native';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { LanguageProvider } from '@/contexts/language-context';
 import { getNotificationEventId, hasOnboarded, scheduleUpcomingReminders } from '@/lib/notifications';
+import { promptForStoreUpdate } from '@/lib/store-update';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -49,10 +50,19 @@ function useOnboardingGate() {
   }, []);
 }
 
+// Offers a newer Play Store version, if there is one - see
+// src/lib/store-update.ts.
+function useStoreUpdateCheck() {
+  useEffect(() => {
+    promptForStoreUpdate();
+  }, []);
+}
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   useReminderSync();
   useOnboardingGate();
+  useStoreUpdateCheck();
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

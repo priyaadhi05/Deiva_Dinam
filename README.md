@@ -89,4 +89,6 @@ chime were removed for launch; their code is intact at commit `e3ee6fd`
 The app makes no network requests of its own. Sharing a greeting hands off
 to the phone's own share sheet (or WhatsApp), and the only permissions it
 asks for are notifications (for reminders) and photos (to share a picture
-you pick).
+you pick). On Android it also asks Google Play, once per launch, whether a
+newer version is out, and offers Play's own in-app update dialog if so
+(`src/lib/store-update.ts`).
